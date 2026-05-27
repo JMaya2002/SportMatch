@@ -7,7 +7,7 @@ import { Card } from '../components/ui/Card.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 
 export default function Clubs() {
-  const [filters, setFilters] = useState({ city: '' })
+  const [filters, setFilters] = useState({ city: '', province: '' })
   const [clubs, setClubs] = useState([])
   const [loading, setLoading] = useState(true)
 

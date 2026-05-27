@@ -13,8 +13,9 @@ export default function Meetups() {
   const [searchParams] = useSearchParams()
   const [filters, setFilters] = useState({
     sport: searchParams.get('sport') || '',
-    level: '',
-    city: '',
+    level: searchParams.get('level') || '',
+    city: searchParams.get('city') || '',
+    province: searchParams.get('province') || '',
   })
   const [meetups, setMeetups] = useState([])
   const [loading, setLoading] = useState(true)

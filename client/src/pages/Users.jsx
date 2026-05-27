@@ -9,7 +9,7 @@ import { Badge } from '../components/ui/Badge.jsx'
 import { SportIcon, sportLabel } from '../components/ui/SportIcon.jsx'
 
 export default function Users() {
-  const [filters, setFilters] = useState({ sport: '', level: '', city: '' })
+  const [filters, setFilters] = useState({ sport: '', level: '', city: '', province: '' })
   const [users, setUsers]     = useState([])
   const [loading, setLoading] = useState(true)
 
