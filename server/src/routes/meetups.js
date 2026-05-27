@@ -32,15 +32,17 @@ const filterSchema = z.object({
   sport: z.string().optional(),
   level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   city: z.string().optional(),
+  province: z.string().optional(),
 })
 
 meetupsRouter.get('/', validate(filterSchema, 'query'), async (req, res, next) => {
   try {
-    const { sport, level, city } = req.validatedQuery
+    const { sport, level, city, province } = req.validatedQuery
     const cond = ["m.status != 'cancelled'"]; const p = []
-    if (sport) { p.push(sport); cond.push(`m.sport = $${p.length}`) }
-    if (level) { p.push(level); cond.push(`m.level = $${p.length}`) }
-    if (city)  { p.push(city);  cond.push(`m.city ILIKE $${p.length}`) }
+    if (sport)    { p.push(sport);    cond.push(`m.sport = $${p.length}`) }
+    if (level)    { p.push(level);    cond.push(`m.level = $${p.length}`) }
+    if (city)     { p.push(city);     cond.push(`m.city ILIKE $${p.length}`) }
+    if (province) { p.push(province); cond.push(`m.province = $${p.length}`) }
     const { rows } = await pool.query(`${SQL} WHERE ${cond.join(' AND ')} ORDER BY m.meetup_date ASC LIMIT 100`, p)
     res.json({ meetups: rows.map(shape) })
   } catch (e) { next(e) }

@@ -46,16 +46,18 @@ const filterSchema = z.object({
   sport: z.string().optional(),
   level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   city: z.string().optional(),
+  province: z.string().optional(),
 })
 
 usersRouter.get('/', validate(filterSchema, 'query'), async (req, res, next) => {
   try {
-    const { sport, level, city } = req.validatedQuery
+    const { sport, level, city, province } = req.validatedQuery
     const conditions = []
     const params = []
-    if (sport) { params.push(sport); conditions.push(`main_sport = $${params.length}`) }
-    if (level) { params.push(level); conditions.push(`level = $${params.length}`) }
-    if (city)  { params.push(city);  conditions.push(`city ILIKE $${params.length}`) }
+    if (sport)    { params.push(sport);    conditions.push(`main_sport = $${params.length}`) }
+    if (level)    { params.push(level);    conditions.push(`level = $${params.length}`) }
+    if (city)     { params.push(city);     conditions.push(`city ILIKE $${params.length}`) }
+    if (province) { params.push(province); conditions.push(`province = $${params.length}`) }
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''
     const { rows } = await pool.query(
       `SELECT * FROM users ${where} ORDER BY created_at DESC LIMIT 50`,

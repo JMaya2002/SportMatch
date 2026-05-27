@@ -49,9 +49,10 @@ export const realApi = {
   // ── USERS ──
   listUsers: (filters = {}) => {
     const params = new URLSearchParams()
-    if (filters.sport) params.set('sport', filters.sport)
-    if (filters.level) params.set('level', filters.level)
-    if (filters.city)  params.set('city', filters.city)
+    if (filters.sport)    params.set('sport', filters.sport)
+    if (filters.level)    params.set('level', filters.level)
+    if (filters.city)     params.set('city', filters.city)
+    if (filters.province) params.set('province', filters.province)
     const qs = params.toString()
     return request('GET', `/users${qs ? `?${qs}` : ''}`)
   },
@@ -71,9 +72,10 @@ export const realApi = {
   // ── MEETUPS (real) ──
   listMeetups: (filters = {}) => {
     const p = new URLSearchParams()
-    if (filters.sport) p.set('sport', filters.sport)
-    if (filters.level) p.set('level', filters.level)
-    if (filters.city)  p.set('city', filters.city)
+    if (filters.sport)    p.set('sport', filters.sport)
+    if (filters.level)    p.set('level', filters.level)
+    if (filters.city)     p.set('city', filters.city)
+    if (filters.province) p.set('province', filters.province)
     const qs = p.toString()
     return request('GET', `/meetups${qs ? `?${qs}` : ''}`)
   },

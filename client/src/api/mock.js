@@ -16,6 +16,44 @@ function setSession(user) {
   else localStorage.removeItem(SESSION_KEY)
 }
 
+// ── Estado en memoria para la demo ───────────────────────────────────────────
+// Persiste mientras la pestaña esté abierta; se reinicia al recargar.
+
+// Amistades: { requesterId, receiverId, status: 'pending'|'accepted' }
+// Pre-poblado para que la demo sea interesante desde el primer momento.
+let FRIEND_REQUESTS = [
+  { requesterId: 2, receiverId: 1, status: 'accepted' }, // elena ↔ joel: amigos
+  { requesterId: 3, receiverId: 5, status: 'pending' },  // carlos → alex: solicitud enviada
+  { requesterId: 8, receiverId: 4, status: 'pending' },  // sara → marta: solicitud recibida
+]
+
+function getFriendRow(a, b) {
+  return FRIEND_REQUESTS.find(f =>
+    (f.requesterId === a && f.receiverId === b) ||
+    (f.requesterId === b && f.receiverId === a)
+  )
+}
+
+function calcFriendStatus(myId, otherId) {
+  if (myId === otherId) return 'self'
+  const row = getFriendRow(myId, otherId)
+  if (!row) return 'none'
+  if (row.status === 'accepted') return 'friends'
+  return row.requesterId === myId ? 'sent' : 'received'
+}
+
+// Seguidores de clubs: Set de `${userId}_${clubId}`
+const CLUB_FOLLOWS = new Set()
+const BASE_FOLLOWERS = { 1: 47, 2: 23, 3: 15, 4: 8 }
+
+function clubFollowCount(clubId) {
+  let n = BASE_FOLLOWERS[clubId] || 0
+  for (const key of CLUB_FOLLOWS) {
+    if (Number(key.split('_')[1]) === clubId) n++
+  }
+  return n
+}
+
 export const mockApi = {
   me: () => delay({ user: getSession() }),
 
@@ -56,7 +94,8 @@ export const mockApi = {
     let users = [...MOCK_USERS]
     if (filters.sport) users = users.filter(u => u.main_sport === filters.sport)
     if (filters.level) users = users.filter(u => u.level === filters.level)
-    if (filters.city)  users = users.filter(u => u.city.toLowerCase().includes(filters.city.toLowerCase()))
+    if (filters.city)     users = users.filter(u => u.city.toLowerCase().includes(filters.city.toLowerCase()))
+    if (filters.province) users = users.filter(u => u.province === filters.province)
     return delay({ users })
   },
 
@@ -81,7 +120,8 @@ export const mockApi = {
     let meetups = [...MOCK_MEETUPS]
     if (filters.sport) meetups = meetups.filter(m => m.sport === filters.sport)
     if (filters.level) meetups = meetups.filter(m => m.level === filters.level)
-    if (filters.city)  meetups = meetups.filter(m => m.city.toLowerCase().includes(filters.city.toLowerCase()))
+    if (filters.city)     meetups = meetups.filter(m => m.city.toLowerCase().includes(filters.city.toLowerCase()))
+    if (filters.province) meetups = meetups.filter(m => m.province === filters.province)
     return delay({ meetups })
   },
   getMeetup: (id) => {
@@ -117,7 +157,11 @@ export const mockApi = {
   getClub: (id) => {
     const club = MOCK_CLUBS.find(c => c.id === Number(id))
     if (!club) throw new Error('Club no encontrado')
-    return delay({ club })
+    const me = getSession()
+    const is_following = me ? CLUB_FOLLOWS.has(`${me.id}_${club.id}`) : false
+    return delay({
+      club: { ...club, venues: [], followers_count: clubFollowCount(club.id), is_following, is_owner: false },
+    })
   },
   getAvailability: (courtId, date) => {
     return delay({ courtId, date, slots: mockAvailability(courtId, date) })
@@ -126,19 +170,77 @@ export const mockApi = {
     return delay({ bookingId: Math.floor(Math.random() * 10000), checkoutUrl: '#demo' })
   },
 
-  // ── Stubs sociales/owner (la demo mock no tiene backend; devolvemos vacíos) ──
-  myFriends:        () => delay({ friends: [], received: [], sent: [] }),
-  friendshipStatus: () => delay({ status: 'none' }),
-  sendFriendRequest: () => delay({ status: 'sent' }),
-  acceptFriend:     () => delay({ status: 'friends' }),
-  removeFriend:     () => delay({ ok: true }),
+  // ── Amistades (con estado en memoria) ──
+  myFriends: () => {
+    const me = getSession()
+    if (!me) return delay({ friends: [], received: [], sent: [] })
+    const friends = [], received = [], sent = []
+    for (const row of FRIEND_REQUESTS) {
+      const isMe = row.requesterId === me.id || row.receiverId === me.id
+      if (!isMe) continue
+      const otherId = row.requesterId === me.id ? row.receiverId : row.requesterId
+      const u = MOCK_USERS.find(u => u.id === otherId)
+      if (!u) continue
+      if (row.status === 'accepted')             friends.push(u)
+      else if (row.receiverId === me.id)         received.push(u)
+      else                                        sent.push(u)
+    }
+    return delay({ friends, received, sent })
+  },
+  friendshipStatus: (userId) => {
+    const me = getSession()
+    if (!me) return delay({ status: 'none' })
+    return delay({ status: calcFriendStatus(me.id, Number(userId)) })
+  },
+  sendFriendRequest: (userId) => {
+    const me = getSession()
+    if (!me) throw new Error('No autenticado')
+    const otherId = Number(userId)
+    if (getFriendRow(me.id, otherId)) throw new Error('Ya existe una relación')
+    FRIEND_REQUESTS.push({ requesterId: me.id, receiverId: otherId, status: 'pending' })
+    return delay({ status: 'sent' })
+  },
+  acceptFriend: (userId) => {
+    const me = getSession()
+    if (!me) throw new Error('No autenticado')
+    const row = getFriendRow(me.id, Number(userId))
+    if (row) row.status = 'accepted'
+    return delay({ status: 'friends' })
+  },
+  removeFriend: (userId) => {
+    const me = getSession()
+    if (!me) return delay({ ok: true })
+    const otherId = Number(userId)
+    FRIEND_REQUESTS = FRIEND_REQUESTS.filter(f =>
+      !((f.requesterId === me.id && f.receiverId === otherId) ||
+        (f.requesterId === otherId && f.receiverId === me.id))
+    )
+    return delay({ ok: true })
+  },
+
+  // ── Clubs propios / seguidos (con estado en memoria) ──
   myMeetups:        () => delay({ created: [], joined: [] }),
   myClubs:          () => delay({ clubs: [] }),
-  myFollowingClubs: () => delay({ clubs: [] }),
+  myFollowingClubs: () => {
+    const me = getSession()
+    if (!me) return delay({ clubs: [] })
+    const clubs = MOCK_CLUBS
+      .filter(c => CLUB_FOLLOWS.has(`${me.id}_${c.id}`))
+      .map(c => ({ ...c, is_following: true, followers_count: clubFollowCount(c.id) }))
+    return delay({ clubs })
+  },
   createOwnClub:    () => { throw new Error('Crear clubes requiere backend real') },
   updateOwnClub:    () => { throw new Error('Editar clubes requiere backend real') },
-  followClub:       () => delay({ ok: true }),
-  unfollowClub:     () => delay({ ok: true }),
+  followClub: (id) => {
+    const me = getSession()
+    if (me) CLUB_FOLLOWS.add(`${me.id}_${Number(id)}`)
+    return delay({ ok: true })
+  },
+  unfollowClub: (id) => {
+    const me = getSession()
+    if (me) CLUB_FOLLOWS.delete(`${me.id}_${Number(id)}`)
+    return delay({ ok: true })
+  },
   clubFollowers:    () => delay({ followers: [] }),
   clubBookings:     () => delay({ bookings: [] }),
   listVenues:       () => delay({ venues: [] }),
