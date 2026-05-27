@@ -21,7 +21,7 @@ const registerSchema = z.object({
   age: z.number().int().min(18, 'Debes ser mayor de 18'),
   city: z.string().min(1).max(100),
   mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']),
-  level: z.enum(['principiante','intermedio','avanzado']),
+  level: z.enum(['principiante','intermedio','avanzado','experto']),
   ageConfirmed: z.literal(true, { errorMap: () => ({ message: 'Debes confirmar que eres mayor de 18' }) }),
 })
 
@@ -141,7 +141,7 @@ const completeSchema = z.object({
   age: z.number().int().min(18, 'Debes ser mayor de 18'),
   city: z.string().min(1).max(100),
   mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']),
-  level: z.enum(['principiante','intermedio','avanzado']),
+  level: z.enum(['principiante','intermedio','avanzado','experto']),
   ageConfirmed: z.literal(true, { errorMap: () => ({ message: 'Debes confirmar que eres mayor de 18' }) }),
 })
 

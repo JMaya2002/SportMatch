@@ -42,7 +42,7 @@ const userCreateSchema = z.object({
   age: z.coerce.number().int().min(18),
   city: z.string().min(1).max(100),
   mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']),
-  level: z.enum(['principiante','intermedio','avanzado']),
+  level: z.enum(['principiante','intermedio','avanzado','experto']),
   is_admin: z.boolean().optional().default(false),
 })
 
@@ -54,7 +54,7 @@ const userUpdateSchema = z.object({
   age: z.coerce.number().int().min(18).optional(),
   city: z.string().min(1).max(100).optional(),
   mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']).optional(),
-  level: z.enum(['principiante','intermedio','avanzado']).optional(),
+  level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   is_admin: z.boolean().optional(),
 })
 
@@ -184,7 +184,7 @@ const meetupCreateSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().optional().default(''),
   sport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']),
-  level: z.enum(['principiante','intermedio','avanzado']),
+  level: z.enum(['principiante','intermedio','avanzado','experto']),
   city: z.string().min(1).max(100),
   location: z.string().max(255).optional().default(''),
   meetup_date: z.string().min(1),

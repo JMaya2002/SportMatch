@@ -44,7 +44,7 @@ function privateProfile(row) {
 // ─── GET /api/users  (con filtros opcionales) ─────────────
 const filterSchema = z.object({
   sport: z.string().optional(),
-  level: z.enum(['principiante','intermedio','avanzado']).optional(),
+  level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   city: z.string().optional(),
 })
 
@@ -83,7 +83,7 @@ const updateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   city: z.string().min(1).max(100).optional(),
   mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']).optional(),
-  level: z.enum(['principiante','intermedio','avanzado']).optional(),
+  level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   bio: z.string().max(500).optional(),
 })
 

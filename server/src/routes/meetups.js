@@ -30,7 +30,7 @@ const SQL = `
 
 const filterSchema = z.object({
   sport: z.string().optional(),
-  level: z.enum(['principiante','intermedio','avanzado']).optional(),
+  level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   city: z.string().optional(),
 })
 
@@ -66,7 +66,7 @@ const createSchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().optional().default(''),
   sport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']),
-  level: z.enum(['principiante','intermedio','avanzado']),
+  level: z.enum(['principiante','intermedio','avanzado','experto']),
   city: z.string().min(1).max(100),
   location: z.string().max(255).optional().default(''),
   meetup_date: z.string().min(1),
