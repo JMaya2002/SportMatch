@@ -34,6 +34,9 @@ function publicCard(row) {
     level: row.level,
     avatar_url: row.avatar_url,
     bio: row.bio,
+    position: row.position,
+    availability: row.availability || [],
+    objectives: row.objectives || [],
   }
 }
 
@@ -91,12 +94,15 @@ const updateSchema = z.object({
   sports: z.array(z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo'])).min(1).max(3).optional(),
   level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   bio: z.string().max(500).optional(),
+  position:     z.string().max(50).optional().nullable(),
+  availability: z.array(z.string()).max(10).optional(),
+  objectives:   z.array(z.string()).max(10).optional(),
 })
 
 usersRouter.patch('/me', requireAuth, validate(updateSchema), async (req, res, next) => {
   try {
     // Mapeo camelCase (API) -> snake_case (DB)
-    const map = { name: 'name', city: 'city', province: 'province', mainSport: 'main_sport', level: 'level', bio: 'bio' }
+    const map = { name: 'name', city: 'city', province: 'province', mainSport: 'main_sport', level: 'level', bio: 'bio', position: 'position' }
     const sets = []
     const params = []
     for (const [key, col] of Object.entries(map)) {
@@ -110,6 +116,14 @@ usersRouter.patch('/me', requireAuth, validate(updateSchema), async (req, res, n
       sets.push(`sports = $${params.length}`)
       params.push(req.body.sports[0])
       sets.push(`main_sport = $${params.length}`)
+    }
+    if (req.body.availability !== undefined) {
+      params.push(req.body.availability)
+      sets.push(`availability = $${params.length}`)
+    }
+    if (req.body.objectives !== undefined) {
+      params.push(req.body.objectives)
+      sets.push(`objectives = $${params.length}`)
     }
     if (!sets.length) {
       // Nada que actualizar: devolvemos el usuario tal cual

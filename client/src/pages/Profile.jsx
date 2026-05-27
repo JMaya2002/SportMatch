@@ -1,13 +1,27 @@
 // client/src/pages/Profile.jsx
 import { useEffect, useState } from 'react'
+
+const AVAILABILITY_OPTIONS = [
+  { value: 'mananas_semana', label: 'Mañanas entre semana' },
+  { value: 'tardes_semana',  label: 'Tardes entre semana' },
+  { value: 'noches_semana',  label: 'Noches entre semana' },
+  { value: 'mananas_finde',  label: 'Mañanas fin de semana' },
+  { value: 'tardes_finde',   label: 'Tardes fin de semana' },
+]
+
+const OBJECTIVE_OPTIONS = [
+  { value: 'competir',      label: '🏆 Competir' },
+  { value: 'entrenar',      label: '💪 Entrenar' },
+  { value: 'pasarlo_bien',  label: '😄 Pasarlo bien' },
+  { value: 'buscar_equipo', label: '🔍 Buscar equipo' },
+]
 import { useParams, Link } from 'react-router-dom'
-import { api, API_MODE } from '../api/client.js'
+import { api } from '../api/client.js'
 import { Card } from '../components/ui/Card.jsx'
 import { Avatar } from '../components/ui/Avatar.jsx'
 import { Badge } from '../components/ui/Badge.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { SportIcon, sportLabel } from '../components/ui/SportIcon.jsx'
-import { MOCK_MEETUPS } from '../mock/data.js'
 import { useAuth } from '../context/AuthContext.jsx'
 
 export default function Profile() {
@@ -15,22 +29,29 @@ export default function Profile() {
   const username = slug?.startsWith('@') ? slug.slice(1) : slug
   const { user: me } = useAuth()
 
-  const [user, setUser]   = useState(null)
-  const [error, setError] = useState(null)
+  const [user, setUser]         = useState(null)
+  const [error, setError]       = useState(null)
   const [friendship, setFriendship] = useState(null)  // 'none' | 'sent' | 'received' | 'friends' | 'self'
-  const [busy, setBusy] = useState(false)
+  const [busy, setBusy]         = useState(false)
+  const [userMeetups, setUserMeetups] = useState([])
 
   useEffect(() => {
-    setError(null); setUser(null); setFriendship(null)
+    setError(null); setUser(null); setFriendship(null); setUserMeetups([])
     api.getUser(username)
       .then(({ user }) => {
         setUser(user)
-        // Cargar estado de amistad si hay backend real y user logueado
-        if (API_MODE === 'real' && me && user && me.id !== user.id && api.friendshipStatus) {
+        // Estado de amistad (funciona tanto en mock como en real)
+        if (me && user && me.id !== user.id) {
           api.friendshipStatus(user.id).then(({ status }) => setFriendship(status)).catch(() => {})
         } else if (me && user && me.id === user.id) {
           setFriendship('self')
         }
+        // Quedadas del usuario (se filtra por creator.username — funciona en ambos modos)
+        api.listMeetups()
+          .then(({ meetups }) =>
+            setUserMeetups(meetups.filter(m => m.creator?.username === user.username))
+          )
+          .catch(() => {})
       })
       .catch(err => setError(err.message))
   }, [username, me])
@@ -50,7 +71,6 @@ export default function Profile() {
   if (!user) return <p className="p-4 text-slate-500">Cargando perfil...</p>
 
   const isMe = me?.username === user.username
-  const userMeetups = MOCK_MEETUPS.filter(m => m.creator.username === user.username)
 
   return (
     <div className="max-w-2xl mx-auto p-4 pb-24">
@@ -80,6 +100,35 @@ export default function Profile() {
             ) : null}
           </div>
           {user.bio && <p className="text-slate-700 mt-3">{user.bio}</p>}
+
+          {(user.position || user.availability?.length > 0 || user.objectives?.length > 0) && (
+            <div className="mt-4 pt-4 border-t border-slate-100">
+              <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Sobre mí</h2>
+              <div className="flex flex-wrap gap-2">
+                {user.position && (
+                  <span className="px-2 py-1 bg-slate-100 rounded text-sm text-slate-700">
+                    📍 {user.position}
+                  </span>
+                )}
+                {user.availability?.map(v => {
+                  const opt = AVAILABILITY_OPTIONS.find(o => o.value === v)
+                  return opt ? (
+                    <span key={v} className="px-2 py-1 bg-blue-50 rounded text-sm text-blue-700">
+                      🕐 {opt.label}
+                    </span>
+                  ) : null
+                })}
+                {user.objectives?.map(v => {
+                  const opt = OBJECTIVE_OPTIONS.find(o => o.value === v)
+                  return opt ? (
+                    <span key={v} className="px-2 py-1 bg-emerald-50 rounded text-sm text-emerald-700">
+                      {opt.label}
+                    </span>
+                  ) : null
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
             <Info label="Edad"    value={`${user.age} años`} />

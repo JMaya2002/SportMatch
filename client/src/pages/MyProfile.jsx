@@ -1,5 +1,28 @@
 // client/src/pages/MyProfile.jsx
 import { useState } from 'react'
+
+const POSITIONS_BY_SPORT = {
+  futbol:     ['Portero', 'Defensa', 'Centrocampista', 'Delantero'],
+  baloncesto: ['Base', 'Escolta', 'Alero', 'Ala-Pívot', 'Pívot'],
+  padel:      ['Drive', 'Revés'],
+  tenis:      ['Fondo', 'Red'],
+  futsal:     ['Portero', 'Cierre', 'Ala', 'Pívot'],
+}
+
+const AVAILABILITY_OPTIONS = [
+  { value: 'mananas_semana', label: 'Mañanas entre semana' },
+  { value: 'tardes_semana',  label: 'Tardes entre semana' },
+  { value: 'noches_semana',  label: 'Noches entre semana' },
+  { value: 'mananas_finde',  label: 'Mañanas fin de semana' },
+  { value: 'tardes_finde',   label: 'Tardes fin de semana' },
+]
+
+const OBJECTIVE_OPTIONS = [
+  { value: 'competir',      label: '🏆 Competir' },
+  { value: 'entrenar',      label: '💪 Entrenar' },
+  { value: 'pasarlo_bien',  label: '😄 Pasarlo bien' },
+  { value: 'buscar_equipo', label: '🔍 Buscar equipo' },
+]
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { api, API_MODE } from '../api/client.js'
@@ -22,6 +45,9 @@ export default function MyProfile() {
     sports: user?.sports?.length ? user.sports : [user?.main_sport].filter(Boolean),
     level: user?.level || 'intermedio',
     bio: user?.bio || '',
+    position:     user?.position || '',
+    availability: user?.availability || [],
+    objectives:   user?.objectives || [],
   })
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState(null)
@@ -127,6 +153,61 @@ export default function MyProfile() {
               className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand/30 focus:border-brand"
             />
           </label>
+          {POSITIONS_BY_SPORT[form.sports?.[0]] && (
+            <Select
+              label="Posición habitual"
+              options={[
+                { value: '', label: 'Sin posición' },
+                ...POSITIONS_BY_SPORT[form.sports[0]].map(p => ({ value: p, label: p }))
+              ]}
+              value={form.position || ''}
+              onChange={e => update('position', e.target.value)}
+            />
+          )}
+          <div>
+            <span className="block text-sm font-medium text-slate-700 mb-2">Disponibilidad</span>
+            <div className="grid grid-cols-2 gap-2">
+              {AVAILABILITY_OPTIONS.map(opt => (
+                <label key={opt.value} className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={(form.availability || []).includes(opt.value)}
+                    onChange={e => {
+                      if (e.target.checked) update('availability', [...(form.availability || []), opt.value])
+                      else update('availability', (form.availability || []).filter(v => v !== opt.value))
+                    }}
+                    className="rounded border-slate-300 text-brand focus:ring-brand/30"
+                  />
+                  {opt.label}
+                </label>
+              ))}
+            </div>
+          </div>
+          <div>
+            <span className="block text-sm font-medium text-slate-700 mb-2">Objetivos</span>
+            <div className="flex flex-wrap gap-2">
+              {OBJECTIVE_OPTIONS.map(opt => {
+                const selected = (form.objectives || []).includes(opt.value)
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      if (selected) update('objectives', (form.objectives || []).filter(v => v !== opt.value))
+                      else update('objectives', [...(form.objectives || []), opt.value])
+                    }}
+                    className={`px-3 py-1 rounded-full text-sm border transition ${
+                      selected
+                        ? 'bg-brand border-brand text-white'
+                        : 'border-slate-300 text-slate-700 hover:border-brand hover:text-brand'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
           {msg && <p className="text-sm text-brand-dark font-medium">{msg}</p>}
           <Button type="submit" disabled={saving} className="w-full">
             {saving ? 'Guardando...' : 'Guardar cambios'}
