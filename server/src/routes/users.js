@@ -28,6 +28,7 @@ function publicCard(row) {
     name: row.name,
     age: row.age,
     city: row.city,
+    province: row.province,
     main_sport: row.main_sport,
     level: row.level,
     avatar_url: row.avatar_url,
@@ -84,6 +85,7 @@ usersRouter.get('/:username', async (req, res, next) => {
 const updateSchema = z.object({
   name: z.string().min(1).max(100).optional(),
   city: z.string().min(1).max(100).optional(),
+  province: z.string().max(100).optional().nullable(),
   mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']).optional(),
   level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   bio: z.string().max(500).optional(),
@@ -92,7 +94,7 @@ const updateSchema = z.object({
 usersRouter.patch('/me', requireAuth, validate(updateSchema), async (req, res, next) => {
   try {
     // Mapeo camelCase (API) -> snake_case (DB)
-    const map = { name: 'name', city: 'city', mainSport: 'main_sport', level: 'level', bio: 'bio' }
+    const map = { name: 'name', city: 'city', province: 'province', mainSport: 'main_sport', level: 'level', bio: 'bio' }
     const sets = []
     const params = []
     for (const [key, col] of Object.entries(map)) {

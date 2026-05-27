@@ -8,13 +8,15 @@ import { Button } from '../components/ui/Button.jsx'
 import { Card } from '../components/ui/Card.jsx'
 import { AgeCheckbox } from '../components/forms/AgeCheckbox.jsx'
 import { SPORTS, LEVELS } from '../components/forms/FilterBar.jsx'
+import { SearchableSelect } from '../components/ui/SearchableSelect.jsx'
+import { PROVINCES, CITIES_BY_PROVINCE } from '../data/locations.js'
 
 export default function Register() {
   const { register } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({
     username: '', email: '', password: '', name: '',
-    age: '', city: '',
+    age: '', city: '', province: '',
     mainSport: 'padel', level: 'intermedio',
     ageConfirmed: false,
   })
@@ -36,6 +38,14 @@ export default function Register() {
     }
   }
 
+  const PROVINCE_OPTIONS = [
+    { value: '', label: 'Selecciona provincia' },
+    ...PROVINCES.map(p => ({ value: p, label: p })),
+  ]
+  const cityOptions = form.province
+    ? [{ value: '', label: 'Selecciona ciudad' }, ...(CITIES_BY_PROVINCE[form.province] || []).map(c => ({ value: c, label: c }))]
+    : [{ value: '', label: 'Primero elige provincia' }]
+
   const canSubmit = form.ageConfirmed && Number(form.age) >= 18
 
   return (
@@ -48,9 +58,22 @@ export default function Register() {
           <Input label="Nombre completo"     required value={form.name}     onChange={e => update('name', e.target.value)} />
           <Input label="Email" type="email"   required value={form.email}    onChange={e => update('email', e.target.value)} />
           <Input label="Contraseña" type="password" required minLength={8} hint="Mínimo 8 caracteres" value={form.password} onChange={e => update('password', e.target.value)} />
+          <Input label="Edad" type="number" min={18} required value={form.age} onChange={e => update('age', e.target.value)} />
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Edad" type="number" min={18} required value={form.age} onChange={e => update('age', e.target.value)} />
-            <Input label="Ciudad" required value={form.city} onChange={e => update('city', e.target.value)} placeholder="Barcelona" />
+            <SearchableSelect
+              label="Provincia"
+              options={PROVINCE_OPTIONS}
+              value={form.province}
+              onChange={p => setForm(f => ({ ...f, province: p, city: '' }))}
+              placeholder="Selecciona provincia"
+            />
+            <SearchableSelect
+              label="Ciudad"
+              options={cityOptions}
+              value={form.city}
+              onChange={c => update('city', c)}
+              placeholder="Selecciona ciudad"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Select label="Deporte" options={SPORTS.filter(s => s.value)} value={form.mainSport} onChange={e => update('mainSport', e.target.value)} />

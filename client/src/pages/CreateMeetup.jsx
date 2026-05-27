@@ -7,18 +7,28 @@ import { Input } from '../components/ui/Input.jsx'
 import { Select } from '../components/ui/Select.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { SPORTS, LEVELS } from '../components/forms/FilterBar.jsx'
+import { SearchableSelect } from '../components/ui/SearchableSelect.jsx'
+import { PROVINCES, CITIES_BY_PROVINCE } from '../data/locations.js'
 
 export default function CreateMeetup() {
   const navigate = useNavigate()
   const [form, setForm] = useState({
     title: '', description: '',
     sport: 'padel', level: 'intermedio',
-    city: '', location: '',
+    city: '', province: '', location: '',
     meetup_date: '', max_players: 4,
   })
   const [loading, setLoading] = useState(false)
 
   function update(k, v) { setForm(f => ({ ...f, [k]: v })) }
+
+  const PROVINCE_OPTIONS = [
+    { value: '', label: 'Selecciona provincia' },
+    ...PROVINCES.map(p => ({ value: p, label: p })),
+  ]
+  const cityOptions = form.province
+    ? [{ value: '', label: 'Selecciona ciudad' }, ...(CITIES_BY_PROVINCE[form.province] || []).map(c => ({ value: c, label: c }))]
+    : [{ value: '', label: 'Primero elige provincia' }]
 
   async function submit(e) {
     e.preventDefault()
@@ -39,9 +49,22 @@ export default function CreateMeetup() {
             <Select label="Nivel"   options={LEVELS.filter(s => s.value)} value={form.level} onChange={e => update('level', e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Input label="Ciudad"   required value={form.city}     onChange={e => update('city', e.target.value)}     placeholder="Barcelona" />
-            <Input label="Lugar"    required value={form.location} onChange={e => update('location', e.target.value)} placeholder="Club X, Pista 2" />
+            <SearchableSelect
+              label="Provincia"
+              options={PROVINCE_OPTIONS}
+              value={form.province}
+              onChange={p => setForm(f => ({ ...f, province: p, city: '' }))}
+              placeholder="Selecciona provincia"
+            />
+            <SearchableSelect
+              label="Ciudad"
+              options={cityOptions}
+              value={form.city}
+              onChange={c => update('city', c)}
+              placeholder="Selecciona ciudad"
+            />
           </div>
+          <Input label="Lugar" required value={form.location} onChange={e => update('location', e.target.value)} placeholder="Club X, Pista 2" />
           <div className="grid grid-cols-2 gap-3">
             <Input label="Fecha y hora" type="datetime-local" required value={form.meetup_date} onChange={e => update('meetup_date', e.target.value)} />
             <Input label="Plazas máx." type="number" min={2} max={30} required value={form.max_players} onChange={e => update('max_players', e.target.value)} />

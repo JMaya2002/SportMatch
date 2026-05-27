@@ -9,12 +9,15 @@ import { Button } from '../components/ui/Button.jsx'
 import { Card } from '../components/ui/Card.jsx'
 import { Avatar } from '../components/ui/Avatar.jsx'
 import { SPORTS, LEVELS } from '../components/forms/FilterBar.jsx'
+import { SearchableSelect } from '../components/ui/SearchableSelect.jsx'
+import { PROVINCES, CITIES_BY_PROVINCE } from '../data/locations.js'
 
 export default function MyProfile() {
   const { user, setUser } = useAuth()
   const [form, setForm] = useState({
     name: user?.name || '',
     city: user?.city || '',
+    province: user?.province || '',
     mainSport: user?.main_sport || 'padel',
     level: user?.level || 'intermedio',
     bio: user?.bio || '',
@@ -23,6 +26,14 @@ export default function MyProfile() {
   const [msg, setMsg] = useState(null)
 
   function update(k, v) { setForm(f => ({ ...f, [k]: v })) }
+
+  const PROVINCE_OPTIONS = [
+    { value: '', label: 'Sin provincia' },
+    ...PROVINCES.map(p => ({ value: p, label: p })),
+  ]
+  const cityOptions = form.province
+    ? [{ value: '', label: 'Sin ciudad' }, ...(CITIES_BY_PROVINCE[form.province] || []).map(c => ({ value: c, label: c }))]
+    : [{ value: '', label: 'Primero elige provincia' }]
 
   async function save(e) {
     e.preventDefault()
@@ -83,7 +94,22 @@ export default function MyProfile() {
         </div>
         <form onSubmit={save} className="space-y-3">
           <Input label="Nombre" value={form.name} onChange={e => update('name', e.target.value)} />
-          <Input label="Ciudad" value={form.city} onChange={e => update('city', e.target.value)} />
+          <div className="grid grid-cols-2 gap-3">
+            <SearchableSelect
+              label="Provincia"
+              options={PROVINCE_OPTIONS}
+              value={form.province}
+              onChange={p => setForm(f => ({ ...f, province: p, city: '' }))}
+              placeholder="Sin provincia"
+            />
+            <SearchableSelect
+              label="Ciudad"
+              options={cityOptions}
+              value={form.city}
+              onChange={c => update('city', c)}
+              placeholder="Sin ciudad"
+            />
+          </div>
           <Select label="Deporte principal" options={SPORTS.filter(s => s.value)} value={form.mainSport} onChange={e => update('mainSport', e.target.value)} />
           <Select label="Nivel"              options={LEVELS.filter(s => s.value)} value={form.level}     onChange={e => update('level', e.target.value)} />
           <label className="block">

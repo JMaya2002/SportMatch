@@ -10,7 +10,7 @@ export const meetupsRouter = express.Router()
 function shape(r) {
   return {
     id: r.id, title: r.title, description: r.description,
-    sport: r.sport, level: r.level, city: r.city, location: r.location,
+    sport: r.sport, level: r.level, city: r.city, province: r.province, location: r.location,
     meetup_date: r.meetup_date, max_players: r.max_players,
     current_players: Number(r.current_players ?? 0),
     status: r.status, creator_id: r.creator_id, created_at: r.created_at,
@@ -70,6 +70,7 @@ const createSchema = z.object({
   sport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']),
   level: z.enum(['principiante','intermedio','avanzado','experto']),
   city: z.string().min(1).max(100),
+  province: z.string().max(100).optional().default(''),
   location: z.string().max(255).optional().default(''),
   meetup_date: z.string().min(1),
   max_players: z.coerce.number().int().min(2).max(50),
@@ -79,11 +80,11 @@ meetupsRouter.post('/', requireAuth, validate(createSchema), async (req, res, ne
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
-    const { title, description, sport, level, city, location, meetup_date, max_players } = req.body
+    const { title, description, sport, level, city, province, location, meetup_date, max_players } = req.body
     const ins = await client.query(
-      `INSERT INTO meetups (creator_id, title, description, sport, level, city, location, meetup_date, max_players)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
-      [req.userId, title, description, sport, level, city, location, meetup_date, max_players])
+      `INSERT INTO meetups (creator_id, title, description, sport, level, city, province, location, meetup_date, max_players)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`,
+      [req.userId, title, description, sport, level, city, province || null, location, meetup_date, max_players])
     const id = ins.rows[0].id
     await client.query(`INSERT INTO meetup_participants (meetup_id, user_id) VALUES ($1, $2)`, [id, req.userId])
     await client.query('COMMIT')
