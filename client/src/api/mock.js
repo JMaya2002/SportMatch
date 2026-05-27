@@ -55,6 +55,25 @@ function clubFollowCount(clubId) {
 }
 
 export const mockApi = {
+  publicStats: () => {
+    const now = new Date()
+    const weekStart = new Date(now)
+    weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7)) // Lunes
+    weekStart.setHours(0, 0, 0, 0)
+    const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000)
+
+    const meetupsThisWeek = MOCK_MEETUPS.filter(m => {
+      const d = new Date(m.meetup_date)
+      return d >= weekStart && d < weekEnd
+    }).length
+
+    return delay({
+      active_players: MOCK_USERS.length,
+      clubs_count: MOCK_CLUBS.length,
+      meetups_this_week: meetupsThisWeek,
+    })
+  },
+
   me: () => delay({ user: getSession() }),
 
   login: (email) => {

@@ -46,6 +46,9 @@ export const realApi = {
   register: (data) => request('POST', '/auth/register', { body: data }),
   logout: () => request('POST', '/auth/logout'),
 
+  // ── PUBLIC ──
+  publicStats: () => request('GET', '/stats'),
+
   // ── USERS ──
   listUsers: (filters = {}) => {
     const params = new URLSearchParams()

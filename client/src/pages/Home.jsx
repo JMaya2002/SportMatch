@@ -1,11 +1,19 @@
 // client/src/pages/Home.jsx
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Button } from '../components/ui/Button.jsx'
 import { Card } from '../components/ui/Card.jsx'
 import { useAuth } from '../context/AuthContext.jsx'
+import { api } from '../api/client.js'
 
 export default function Home() {
   const { user } = useAuth()
+  const [stats, setStats] = useState(null)
+  const [statsError, setStatsError] = useState(false)
+
+  useEffect(() => {
+    api.publicStats().then(setStats).catch(() => setStatsError(true))
+  }, [])
 
   return (
     <div>
@@ -35,6 +43,32 @@ export default function Home() {
                 </Button>
               </Link>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* CONTADORES EN VIVO */}
+      <section className="bg-slate-900 text-white py-10">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="grid grid-cols-3 gap-6 text-center">
+            <div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-brand">
+                {statsError ? '?' : stats ? stats.active_players.toLocaleString('es-ES') : '—'}
+              </div>
+              <div className="text-sm text-slate-400 mt-1">Jugadores activos</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-brand">
+                {statsError ? '?' : stats ? stats.clubs_count.toLocaleString('es-ES') : '—'}
+              </div>
+              <div className="text-sm text-slate-400 mt-1">Clubes</div>
+            </div>
+            <div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-brand">
+                {statsError ? '?' : stats ? stats.meetups_this_week.toLocaleString('es-ES') : '—'}
+              </div>
+              <div className="text-sm text-slate-400 mt-1">Quedadas esta semana</div>
+            </div>
           </div>
         </div>
       </section>
