@@ -2,13 +2,13 @@
 -- Usuarios de prueba. Password de todos: "test1234"
 -- Hash bcrypt precomputado de "test1234"
 
-INSERT INTO users (username, email, password_hash, name, age, city, main_sport, level, age_confirmed)
+INSERT INTO users (username, email, password_hash, name, age, city, province, main_sport, sports, level, age_confirmed)
 VALUES
-  ('joel',    'joel@test.com',    '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Joel Maya',     28, 'Barcelona', 'padel',      'intermedio',   true),
-  ('elena',   'elena@test.com',   '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Elena Soler',   26, 'Barcelona', 'tenis',      'avanzado',     true),
-  ('carlos',  'carlos@test.com',  '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Carlos Ruiz',   34, 'Madrid',    'futbol',     'intermedio',   true),
-  ('marta',   'marta@test.com',   '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Marta López',   22, 'Valencia',  'running',    'principiante', true),
-  ('alex',    'alex@test.com',    '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Alex Torres',   30, 'Barcelona', 'baloncesto', 'avanzado',     true);
+  ('joel',   'joel@test.com',   '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Joel Maya',   28, 'Barcelona', 'Barcelona', 'padel',      ARRAY['padel','tenis'],         'intermedio',   true),
+  ('elena',  'elena@test.com',  '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Elena Soler', 26, 'Barcelona', 'Barcelona', 'tenis',      ARRAY['tenis'],                 'experto',      true),
+  ('carlos', 'carlos@test.com', '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Carlos Ruiz', 34, 'Madrid',    'Madrid',    'futbol',     ARRAY['futbol','running'],      'intermedio',   true),
+  ('marta',  'marta@test.com',  '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Marta López', 22, 'Valencia',  'Valencia',  'running',    ARRAY['running'],               'principiante', true),
+  ('alex',   'alex@test.com',   '$2b$10$55BVJmNrNvF8gZnDOu25gOMiMZgoGDjGNkCIrXcAAt2LdK57MpCxe', 'Alex Torres', 30, 'Barcelona', 'Barcelona', 'baloncesto', ARRAY['baloncesto','futbol'],   'experto',      true);
 
 -- Admin de prueba: joel (id=1) tiene acceso al panel
 UPDATE users SET is_admin = true WHERE username = 'joel';
@@ -30,19 +30,19 @@ INSERT INTO friendships (requester_id, receiver_id, status) VALUES
 -- ============================================
 -- QUEDADAS DE PRUEBA
 -- ============================================
-INSERT INTO meetups (creator_id, title, description, sport, level, city, location, meetup_date, max_players)
+INSERT INTO meetups (creator_id, title, description, sport, level, city, province, location, meetup_date, max_players)
 VALUES
   (1, 'Partido de pádel — domingo mañana',
    'Buscamos 2 jugadores nivel intermedio para partido amistoso. Llevamos pelotas.',
-   'padel', 'intermedio', 'Barcelona', 'Club Pádel Sant Cugat',
+   'padel', 'intermedio', 'Barcelona', 'Barcelona', 'Club Pádel Sant Cugat',
    NOW() + INTERVAL '5 days' + INTERVAL '10 hours', 4),
   (3, 'Fútbol 7 los miércoles',
    'Partido semanal. Faltan jugadores para esta semana. Llevamos petos.',
-   'futbol', 'intermedio', 'Madrid', 'Campo municipal de Carabanchel',
+   'futbol', 'intermedio', 'Madrid', 'Madrid', 'Campo municipal de Carabanchel',
    NOW() + INTERVAL '2 days' + INTERVAL '19 hours', 14),
   (4, 'Carrera 5K — Domingo del Turia',
    'Trote suave de 5K por el cauce. Ritmo cómodo (~6:30 min/km). Cualquier nivel bienvenido.',
-   'running', 'principiante', 'Valencia', 'Jardín del Turia',
+   'running', 'principiante', 'Valencia', 'Valencia', 'Jardín del Turia',
    NOW() + INTERVAL '6 days' + INTERVAL '9 hours', 20);
 
 -- El creador es automáticamente participante
