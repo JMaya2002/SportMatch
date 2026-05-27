@@ -20,8 +20,7 @@ export default function Home() {
             Encuentra con quién<br/>hacer deporte
           </h1>
           <p className="text-lg sm:text-xl text-white/90 mt-5 max-w-2xl mx-auto">
-            La app que une deportistas y clubs en tu ciudad.
-            Crea quedadas, descubre gente de tu nivel y reserva pistas en segundos.
+            Encuentra jugadores, equipos y clubes cerca de ti.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row justify-center gap-3">
             <Link to="/meetups">

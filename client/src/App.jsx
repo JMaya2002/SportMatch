@@ -42,7 +42,7 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand to-emerald-700">
         <div className="text-center text-white">
           <div className="text-6xl mb-3">🏆</div>
-          <p className="text-xl font-bold">SportMatch</p>
+          <p className="text-xl font-bold">Sportivo</p>
           <p className="text-sm text-white/80 mt-1">Cargando...</p>
         </div>
       </div>

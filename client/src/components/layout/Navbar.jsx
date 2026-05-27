@@ -18,7 +18,7 @@ export function Navbar() {
       <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2 font-bold text-xl">
           <span className="text-2xl">🏆</span>
-          <span className="text-brand">SportMatch</span>
+          <span className="text-brand">Sportivo</span>
         </Link>
         <nav className="flex items-center gap-3">
           <Link to="/meetups" className="hidden sm:inline text-sm text-slate-700 hover:text-brand">Quedadas</Link>
