@@ -14,6 +14,7 @@ import { bookingsRouter } from './routes/bookings.js'
 import { adminRouter } from './routes/admin.js'
 import { clubVenuesRouter, venuesRouter, courtsAdminRouter } from './routes/venues.js'
 import { friendshipsRouter } from './routes/friendships.js'
+import { statsRouter } from './routes/stats.js'
 import { passport } from './passport.js'
 import { stripe } from './stripe.js'
 
@@ -66,6 +67,7 @@ export function createApp() {
   app.use('/api/venues', venuesRouter)
   app.use('/api/courts', courtsAdminRouter)
   app.use('/api/users', friendshipsRouter)
+  app.use('/api/stats', statsRouter)
 
   app.use(errorHandler)
   return app
