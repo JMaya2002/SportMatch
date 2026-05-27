@@ -11,7 +11,7 @@ const validRegister = {
   name: 'Nuevo Usuario',
   age: 25,
   city: 'Barcelona',
-  mainSport: 'padel',
+  sports: ['padel'],
   level: 'intermedio',
   ageConfirmed: true,
 }
