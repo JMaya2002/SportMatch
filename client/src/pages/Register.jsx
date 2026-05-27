@@ -7,7 +7,8 @@ import { Select } from '../components/ui/Select.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Card } from '../components/ui/Card.jsx'
 import { AgeCheckbox } from '../components/forms/AgeCheckbox.jsx'
-import { SPORTS, LEVELS } from '../components/forms/FilterBar.jsx'
+import { LEVELS } from '../components/forms/FilterBar.jsx'
+import { SportPicker } from '../components/forms/SportPicker.jsx'
 import { SearchableSelect } from '../components/ui/SearchableSelect.jsx'
 import { PROVINCES, CITIES_BY_PROVINCE } from '../data/locations.js'
 
@@ -17,7 +18,7 @@ export default function Register() {
   const [form, setForm] = useState({
     username: '', email: '', password: '', name: '',
     age: '', city: '', province: '',
-    mainSport: 'padel', level: 'intermedio',
+    sports: ['padel'], level: 'intermedio',
     ageConfirmed: false,
   })
   const [error, setError] = useState(null)
@@ -75,10 +76,13 @@ export default function Register() {
               placeholder="Selecciona ciudad"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Select label="Deporte" options={SPORTS.filter(s => s.value)} value={form.mainSport} onChange={e => update('mainSport', e.target.value)} />
-            <Select label="Nivel"   options={LEVELS.filter(s => s.value)} value={form.level}     onChange={e => update('level', e.target.value)} />
+          <div>
+            <span className="block text-sm font-medium text-slate-700 mb-1">
+              Deportes principales <span className="text-slate-400">(hasta 3)</span>
+            </span>
+            <SportPicker value={form.sports} onChange={v => update('sports', v)} />
           </div>
+          <Select label="Nivel" options={LEVELS.filter(s => s.value)} value={form.level} onChange={e => update('level', e.target.value)} />
           <AgeCheckbox checked={form.ageConfirmed} onChange={v => update('ageConfirmed', v)} />
           {error && <p className="text-sm text-rose-600">{error}</p>}
           <Button type="submit" disabled={loading || !canSubmit} className="w-full">

@@ -72,16 +72,19 @@ export const mockApi = {
   },
 
   register: (data) => {
+    const mainSport = Array.isArray(data.sports) ? data.sports[0] : data.mainSport
     const newUser = {
       id: MOCK_USERS.length + 1,
       username: data.username,
       name: data.name,
       age: Number(data.age),
       city: data.city,
-      main_sport: data.mainSport,
+      province: data.province || null,
+      main_sport: mainSport,
+      sports: data.sports || [mainSport],
       level: data.level,
       avatar_url: `https://i.pravatar.cc/200?u=${data.username}`,
-      bio: '¡Hola! Soy nuevo en SportMatch.',
+      bio: '¡Hola! Soy nuevo en Sportivo.',
     }
     MOCK_USERS.push(newUser)
     setSession(newUser)

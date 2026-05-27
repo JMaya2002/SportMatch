@@ -21,7 +21,7 @@ const registerSchema = z.object({
   age: z.number().int().min(18, 'Debes ser mayor de 18'),
   city: z.string().min(1).max(100),
   province: z.string().max(100).optional(),
-  mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']),
+  sports: z.array(z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo'])).min(1).max(3),
   level: z.enum(['principiante','intermedio','avanzado','experto']),
   ageConfirmed: z.literal(true, { errorMap: () => ({ message: 'Debes confirmar que eres mayor de 18' }) }),
 })
@@ -46,12 +46,13 @@ function publicUser(row) {
 // ─── POST /api/auth/register ──────────────────────────────
 authRouter.post('/register', validate(registerSchema), async (req, res, next) => {
   try {
-    const { username, email, password, name, age, city, province, mainSport, level, ageConfirmed } = req.body
+    const { username, email, password, name, age, city, province, sports, level, ageConfirmed } = req.body
+    const mainSport = sports[0]
     const hash = await bcrypt.hash(password, 10)
     const result = await pool.query(
-      `INSERT INTO users (username, email, password_hash, name, age, city, province, main_sport, level, age_confirmed)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [username, email, hash, name, age, city, province || null, mainSport, level, ageConfirmed]
+      `INSERT INTO users (username, email, password_hash, name, age, city, province, main_sport, sports, level, age_confirmed)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+      [username, email, hash, name, age, city, province || null, mainSport, sports, level, ageConfirmed]
     )
     issueToken(res, result.rows[0].id)
     res.status(201).json({ user: publicUser(result.rows[0]) })
@@ -142,18 +143,19 @@ const completeSchema = z.object({
   age: z.number().int().min(18, 'Debes ser mayor de 18'),
   city: z.string().min(1).max(100),
   province: z.string().max(100).optional(),
-  mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']),
+  sports: z.array(z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo'])).min(1).max(3),
   level: z.enum(['principiante','intermedio','avanzado','experto']),
   ageConfirmed: z.literal(true, { errorMap: () => ({ message: 'Debes confirmar que eres mayor de 18' }) }),
 })
 
 authRouter.post('/register/complete', validate(completeSchema), async (req, res, next) => {
   try {
-    const { googleId, email, name, username, age, city, province, mainSport, level, ageConfirmed } = req.body
+    const { googleId, email, name, username, age, city, province, sports, level, ageConfirmed } = req.body
+    const mainSport = sports[0]
     const result = await pool.query(
-      `INSERT INTO users (username, email, google_id, name, age, city, province, main_sport, level, age_confirmed)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
-      [username, email, googleId, name, age, city, province || null, mainSport, level, ageConfirmed]
+      `INSERT INTO users (username, email, google_id, name, age, city, province, main_sport, sports, level, age_confirmed)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING *`,
+      [username, email, googleId, name, age, city, province || null, mainSport, sports, level, ageConfirmed]
     )
     issueToken(res, result.rows[0].id)
     res.status(201).json({ user: publicUser(result.rows[0]) })

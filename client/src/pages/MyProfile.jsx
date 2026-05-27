@@ -8,7 +8,8 @@ import { Select } from '../components/ui/Select.jsx'
 import { Button } from '../components/ui/Button.jsx'
 import { Card } from '../components/ui/Card.jsx'
 import { Avatar } from '../components/ui/Avatar.jsx'
-import { SPORTS, LEVELS } from '../components/forms/FilterBar.jsx'
+import { LEVELS } from '../components/forms/FilterBar.jsx'
+import { SportPicker } from '../components/forms/SportPicker.jsx'
 import { SearchableSelect } from '../components/ui/SearchableSelect.jsx'
 import { PROVINCES, CITIES_BY_PROVINCE } from '../data/locations.js'
 
@@ -18,7 +19,7 @@ export default function MyProfile() {
     name: user?.name || '',
     city: user?.city || '',
     province: user?.province || '',
-    mainSport: user?.main_sport || 'padel',
+    sports: user?.sports?.length ? user.sports : [user?.main_sport].filter(Boolean),
     level: user?.level || 'intermedio',
     bio: user?.bio || '',
   })
@@ -110,8 +111,13 @@ export default function MyProfile() {
               placeholder="Sin ciudad"
             />
           </div>
-          <Select label="Deporte principal" options={SPORTS.filter(s => s.value)} value={form.mainSport} onChange={e => update('mainSport', e.target.value)} />
-          <Select label="Nivel"              options={LEVELS.filter(s => s.value)} value={form.level}     onChange={e => update('level', e.target.value)} />
+          <div>
+            <span className="block text-sm font-medium text-slate-700 mb-1">
+              Deportes principales <span className="text-slate-400">(hasta 3)</span>
+            </span>
+            <SportPicker value={form.sports} onChange={v => update('sports', v)} />
+          </div>
+          <Select label="Nivel" options={LEVELS.filter(s => s.value)} value={form.level} onChange={e => update('level', e.target.value)} />
           <label className="block">
             <span className="block text-sm font-medium text-slate-700 mb-1">Bio</span>
             <textarea

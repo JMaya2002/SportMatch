@@ -30,6 +30,7 @@ function publicCard(row) {
     city: row.city,
     province: row.province,
     main_sport: row.main_sport,
+    sports: row.sports || [],
     level: row.level,
     avatar_url: row.avatar_url,
     bio: row.bio,
@@ -87,6 +88,7 @@ const updateSchema = z.object({
   city: z.string().min(1).max(100).optional(),
   province: z.string().max(100).optional().nullable(),
   mainSport: z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo']).optional(),
+  sports: z.array(z.enum(['futbol','padel','baloncesto','running','tenis','ciclismo','fitness','senderismo'])).min(1).max(3).optional(),
   level: z.enum(['principiante','intermedio','avanzado','experto']).optional(),
   bio: z.string().max(500).optional(),
 })
@@ -102,6 +104,12 @@ usersRouter.patch('/me', requireAuth, validate(updateSchema), async (req, res, n
         params.push(req.body[key])
         sets.push(`${col} = $${params.length}`)
       }
+    }
+    if (req.body.sports !== undefined) {
+      params.push(req.body.sports)
+      sets.push(`sports = $${params.length}`)
+      params.push(req.body.sports[0])
+      sets.push(`main_sport = $${params.length}`)
     }
     if (!sets.length) {
       // Nada que actualizar: devolvemos el usuario tal cual
