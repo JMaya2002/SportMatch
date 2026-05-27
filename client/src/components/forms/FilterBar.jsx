@@ -18,6 +18,7 @@ export const LEVELS = [
   { value: 'principiante', label: 'Principiante' },
   { value: 'intermedio',   label: 'Intermedio' },
   { value: 'avanzado',     label: 'Avanzado' },
+  { value: 'experto',      label: 'Experto' },
 ]
 
 export function FilterBar({ filters, onChange, showLevel = true, showCity = true, showSport = true }) {
